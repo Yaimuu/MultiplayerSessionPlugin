@@ -18,11 +18,21 @@ class MULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup(int32 NumberPublicConnections, FString TypeOfMatch);
+	void MenuSetup(int32 NumberPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString PathToLobby = FString(TEXT("/MultiplayerSessions/Lobby")));
 
 protected:
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
+
+	//
+	// Blueprint callable functions
+	//
+	UFUNCTION(BlueprintCallable)
+	void HostGameSession(int32 NumberPublicConnections, FName SessionName, FString Password, FString GameMode);
+	UFUNCTION(BlueprintCallable)
+	void JoinGameSession(FString Id);
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void FindGameSessions(UWidget* SessionWidget);
 
 	//
 	// Callbacks for the custom delegates for the Menu class to bind callbacks to
@@ -37,17 +47,17 @@ protected:
 	void OnStartSession(bool bWasSuccessful);
 
 private:
-	UPROPERTY(meta = (BindWidget))
-	class UButton* HostButton;
+	/*UPROPERTY(meta = (BindWidget))
+	class UButton* HostButton;*/
 
-	UPROPERTY(meta = (BindWidget))
-	UButton* JoinButton;
+	//UPROPERTY(meta = (BindWidget))
+	//UButton* JoinButton;
 
-	UFUNCTION()
-	void HostButtonClicked();
+	//UFUNCTION()
+	//void HostButtonClicked();
 
-	UFUNCTION()
-	void JoinButtonClicked();
+	/*UFUNCTION()
+	void JoinButtonClicked();*/
 
 	void MenuTearDown();
 
@@ -56,5 +66,7 @@ private:
 
 	int32 NumPublicConnections{ 4 };
 	FString MatchType{ (TEXT("FreeForAll")) };
+	FString LobbyPath{ (TEXT("")) };
 
+	TArray<FOnlineSessionSearchResult> LastSessionResults;
 };
