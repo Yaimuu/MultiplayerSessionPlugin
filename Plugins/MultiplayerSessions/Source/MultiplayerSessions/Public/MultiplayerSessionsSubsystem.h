@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "OnlineSessionSettings.h"
 #include <Interfaces/OnlineSessionInterface.h>
-
 #include "MultiplayerSessionsSubsystem.generated.h"
 
 //
@@ -29,8 +31,9 @@ public:
 	UMultiplayerSessionsSubsystem();
 
 	// To handle session functionality. The menu class will call these.
-	void CreateSession(int32 NumPublicConnections, FName SessionName, FString MatchType);
+	void CreateSession(int32 NumPublicConnections, FString SessionName, FString MatchType);
 	void FindSessions(int32 MaxSearchResults);
+	void FindSessionByName(FName SessionName);
 	void JoinSession(const FOnlineSessionSearchResult& SessionResult);
 	void DestroySession();
 	void StartSession();
@@ -81,5 +84,6 @@ private:
 
 	bool bCreateSessionOnDestroy{ false };
 	int32 LastNumPublicConnections;
+	FString LastGameMode;
 	FString LastMatchType;
 };

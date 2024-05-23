@@ -3,6 +3,7 @@
 
 #include "MultiplayerSessionsSubsystem.h"
 #include <OnlineSubsystem.h>
+#include <OnlineSubsystemTypes.h>
 #include "OnlineSessionSettings.h"
 #include <Online/OnlineSessionNames.h>
 
@@ -24,7 +25,7 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem() :
 // Delegate callbacks
 //
 
-void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FName SessionName, FString MatchType)
+void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FString SessionName, FString MatchType)
 {
 	if (!SessionInterface.IsValid())
 		return;
@@ -33,7 +34,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FN
 	if (ExistingSession != nullptr) {
 		bCreateSessionOnDestroy = true;
 		LastNumPublicConnections = NumPublicConnections;
-		LastMatchType = MatchType;
+		LastGameMode = MatchType;
 
 		DestroySession();
 	}
@@ -48,6 +49,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FN
 	LastSessionSettings->bShouldAdvertise = true;
 	LastSessionSettings->bUsesPresence = true;
 	LastSessionSettings->bUseLobbiesIfAvailable = true;
+	LastSessionSettings->Set(FName("SessionName"), SessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	LastSessionSettings->BuildUniqueId = 1;
 
@@ -83,6 +85,15 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 		// Broadcast custom delegate
 		MultiplayerOnFindSessionComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 	}
+}
+
+void UMultiplayerSessionsSubsystem::FindSessionByName(FName SessionName)
+{
+	if (!SessionInterface.IsValid())
+		return;
+
+	//TODO: Handle Delegate
+	
 }
 
 void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult& SessionResult)
@@ -180,7 +191,7 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 
 	if (bWasSuccessful && bCreateSessionOnDestroy) {
 		bCreateSessionOnDestroy = false;
-		CreateSession(LastNumPublicConnections, SessionName, LastMatchType);
+		CreateSession(LastNumPublicConnections, SessionName.ToString(), LastMatchType);
 	}
 
 	MultiplayerOnDestroySessionComplete.Broadcast(bWasSuccessful);
